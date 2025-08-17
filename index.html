@@ -19,7 +19,7 @@
     let datos = {};
 
     // Cargar archivo CSV con datos
-    fetch("notas.cv.csv")
+    fetch("notas.csv")
       .then(r => r.text())
       .then(t => {
         let lineas = t.split("\n").slice(1); // omitir cabecera
@@ -49,4 +49,5 @@
   </script>
 </body>
 </html>
+
 
