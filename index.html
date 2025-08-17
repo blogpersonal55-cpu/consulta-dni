@@ -7,6 +7,8 @@
     body { font-family: Arial; padding: 20px; }
     input, button { padding: 10px; margin: 5px; }
     #resultado { margin-top: 20px; }
+    table { border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #555; padding: 8px; }
   </style>
 </head>
 <body>
@@ -16,31 +18,41 @@
   <div id="resultado"></div>
 
   <script>
-    let datos = {};
+    let datos = [];
+    let cabeceras = [];
 
-    // Cargar archivo CSV con datos
+    // Cargar archivo CSV
     fetch("notas.csv")
       .then(r => r.text())
       .then(t => {
-        let lineas = t.split("\n").slice(1); // omitir cabecera
-        lineas.forEach(l => {
-          let [dni, nombre, curso, nota] = l.split(",");
-          if(dni){ // evitar líneas vacías
-            if(!datos[dni]) datos[dni] = {nombre: nombre, cursos: []};
-            datos[dni].cursos.push({curso: curso, nota: nota});
-          }
-        });
+        let lineas = t.trim().split("\n");
+        cabeceras = lineas[0].split(",");
+        for (let i = 1; i < lineas.length; i++) {
+          let fila = lineas[i].split(",");
+          let obj = {};
+          cabeceras.forEach((c, j) => obj[c.trim()] = fila[j]);
+          datos.push(obj);
+        }
       });
 
     function buscar(){
       let dni = document.getElementById("dni").value.trim();
       let r = document.getElementById("resultado");
-      if(datos[dni]){
-        let html = `<h3>${datos[dni].nombre}</h3><ul>`;
-        datos[dni].cursos.forEach(c => {
-          html += `<li>${c.curso}: ${c.nota}</li>`;
+      let alumno = datos.find(d => d["DNI"] === dni);
+
+      if(alumno){
+        let html = `<h3>${alumno["Estudiante"]}</h3>`;
+        html += `<p>Grado: ${alumno["Grado"]} - Sección: ${alumno["Sección"]}</p>`;
+        html += `<table><tr>`;
+        // Cabeceras de cursos (omitir las columnas fijas)
+        cabeceras.slice(5).forEach(c => {
+          html += `<th>${c}</th>`;
         });
-        html += "</ul>";
+        html += `</tr><tr>`;
+        cabeceras.slice(5).forEach(c => {
+          html += `<td>${alumno[c]}</td>`;
+        });
+        html += `</tr></table>`;
         r.innerHTML = html;
       }else{
         r.innerHTML = "❌ DNI no encontrado";
@@ -49,5 +61,3 @@
   </script>
 </body>
 </html>
-
-
