@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Notas por DNI</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { padding: 10px; margin: 5px; }
+    #resultado { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Consulta de Notas por DNI</h2>
+  <input type="text" id="dni" placeholder="Ingrese DNI">
+  <button onclick="buscar()">Buscar</button>
+  <div id="resultado"></div>
+
+  <script>
+    let datos = {};
+
+    // Cargar archivo CSV con datos
+    fetch("notas.csv")
+      .then(r => r.text())
+      .then(t => {
+        let lineas = t.split("\n").slice(1); // omitir cabecera
+        lineas.forEach(l => {
+          let [dni, nombre, curso, nota] = l.split(",");
+          if(dni){ // evitar líneas vacías
+            if(!datos[dni]) datos[dni] = {nombre: nombre, cursos: []};
+            datos[dni].cursos.push({curso: curso, nota: nota});
+          }
+        });
+      });
+
+    function buscar(){
+      let dni = document.getElementById("dni").value.trim();
+      let r = document.getElementById("resultado");
+      if(datos[dni]){
+        let html = `<h3>${datos[dni].nombre}</h3><ul>`;
+        datos[dni].cursos.forEach(c => {
+          html += `<li>${c.curso}: ${c.nota}</li>`;
+        });
+        html += "</ul>";
+        r.innerHTML = html;
+      }else{
+        r.innerHTML = "❌ DNI no encontrado";
+      }
+    }
+  </script>
+</body>
+</html>
